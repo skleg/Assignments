@@ -1,4 +1,4 @@
-using CloudSales.Api.Endpoints;
+using CloudSales.Api.Authentication;
 using CloudSales.Api.Extensions;
 using CloudSales.Application.Services;
 using CloudSales.Core.Interfaces;
@@ -8,8 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("Jwt"));
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGenWithAuth();
+
+builder.Services.AddAuthorization();
+builder.AddAddJwtBearerAuthentication();
 
 builder.Services.AddDbContext<AppDbContext>(options => 
 {
@@ -20,8 +25,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ISalesRepository, SalesRepository>();
 builder.Services.AddScoped<ISalesService, SalesService>();
+builder.Services.AddScoped<TokenGenerator>();
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (!app.Environment.IsDevelopment())
 {

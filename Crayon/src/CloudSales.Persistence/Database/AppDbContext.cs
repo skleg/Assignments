@@ -35,6 +35,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(x => x.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<Customer>().HasIndex(x => x.UserName).IsUnique();
+
         modelBuilder.Entity<License>()
             .ToTable("Licenses")
             .HasKey(x => new { x.AccountId, x.ServiceId });
