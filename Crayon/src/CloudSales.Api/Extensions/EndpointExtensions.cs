@@ -4,8 +4,11 @@ namespace CloudSales.Api.Extensions;
 
 public static class EndpointExtensions
 {
-    public static void MapApiEndpoints(this IEndpointRouteBuilder builder)
+    public static void MapApiEndpoints(this WebApplication app)
     {
-        builder.MapCustomerEndpoints();
+        if (app.Environment.IsDevelopment())
+            app.MapCustomerEndpoints();
+
+        app.MapAccountEndpoints();
     }
 }

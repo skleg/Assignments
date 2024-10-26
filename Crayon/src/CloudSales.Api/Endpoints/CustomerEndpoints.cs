@@ -14,8 +14,8 @@ public static class CustomerEndpoints
 
         group.MapGet("/", async (int pageNo, int pageSize, ISalesService salesService, CancellationToken ct) =>
         {
-            var customer = await salesService.GetCustomersAsync(pageNo, pageSize, ct);
-            return customer.ToOk(page => PageDto<CustomerDto>.CreateFrom(page, customer => customer.ToDto()));
+            var customers = await salesService.GetCustomersAsync(pageNo, pageSize, ct);
+            return customers.ToOk(page => PageDto<CustomerDto>.CreateFrom(page, customer => customer.ToDto()));
         })
         .Produces<PageDto<CustomerDto>>()
         .WithSummary("Get customers")
