@@ -1,4 +1,5 @@
 using CloudSales.Api.Extensions;
+using CloudSales.Application.Services;
 using CloudSales.Core.Interfaces;
 using CloudSales.Persistence.Database;
 using CloudSales.Persistence.Repository;
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddScoped<ISalesRepository, SalesRepository>();
+builder.Services.AddScoped<ISalesService, SalesService>();
 
 var app = builder.Build();
 
@@ -34,5 +36,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapApiEndpoints();
 
 app.Run();

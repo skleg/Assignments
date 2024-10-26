@@ -1,5 +1,6 @@
 using CloudSales.Core.Entities;
 using CloudSales.Core.Interfaces;
+using CloudSales.Core.Shared;
 using CloudSales.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,12 +13,15 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         return dbContext.Accounts.FirstOrDefaultAsync(x => x.AccountId == accountId, ct);
     }
 
-    public Task<List<Account>> GetAccountsAsync(int customerId, int pageNo, int pageSize, CancellationToken ct)
+    public async Task<EntityPage<Account>> GetAccountsAsync(int customerId, Pagination pagination, CancellationToken ct)
     {
-        return dbContext.Accounts
-            .Skip((pageNo - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
+        var query = dbContext.Accounts.Where(x => x.CustomerId == customerId);
+
+        return new EntityPage<Account>(
+            await query.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await query.CountAsync(ct),
+            pagination.PageNo,
+            pagination.PageSize);
     }
 
     public Task<Customer?> GetCustomerAsync(int customerId, CancellationToken ct)
@@ -25,12 +29,13 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         return dbContext.Customers.FirstOrDefaultAsync(x => x.CustomerId == customerId, ct);
     }
 
-    public Task<List<Customer>> GetCustomersAsync(int pageNo, int pageSize, CancellationToken ct)
+    public async Task<EntityPage<Customer>> GetCustomersAsync(Pagination pagination, CancellationToken ct)
     {
-        return dbContext.Customers
-            .Skip((pageNo - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
+        return new EntityPage<Customer>(
+            await dbContext.Customers.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await dbContext.Customers.CountAsync(ct),
+            pagination.PageNo,
+            pagination.PageSize);
     }
 
     public Task<License?> GetLicenseAsync(int accountId, int serviceId, CancellationToken ct)
@@ -38,13 +43,15 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         return dbContext.Licenses.FirstOrDefaultAsync(x => x.AccountId == accountId && x.ServiceId == serviceId, ct);
     }
 
-    public Task<List<License>> GetAccountLicensesAsync(int accountId, int pageNo, int pageSize, CancellationToken ct)
+    public async Task<EntityPage<License>> GetAccountLicensesAsync(int accountId, Pagination pagination, CancellationToken ct)
     {
-        return dbContext.Licenses
-            .Where(x => x.AccountId == accountId)
-            .Skip((pageNo - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
+        var query = dbContext.Licenses.Where(x => x.AccountId == accountId);
+
+        return new EntityPage<License>(
+            await query.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await query.CountAsync(ct),
+            pagination.PageNo,
+            pagination.PageSize);
     }
 
     public Task UpdateAccountAsync(Account account, CancellationToken ct)
