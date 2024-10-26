@@ -1,3 +1,4 @@
+using CloudSales.Api.Endpoints;
 using CloudSales.Api.Extensions;
 using CloudSales.Application.Services;
 using CloudSales.Core.Interfaces;
@@ -33,6 +34,8 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.MapCustomerEndpoints();
 }
 
 app.UseHttpsRedirection();

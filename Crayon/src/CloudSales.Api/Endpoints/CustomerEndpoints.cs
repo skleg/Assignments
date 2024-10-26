@@ -12,10 +12,19 @@ public static class CustomerEndpoints
         var group = builder.MapGroup("/api/customers")
             .WithTags("Customers");
 
+        group.MapGet("/", async (int pageNo, int pageSize, ISalesService salesService, CancellationToken ct) =>
+        {
+            var customer = await salesService.GetCustomersAsync(pageNo, pageSize, ct);
+            return customer.ToOk(page => PageDto<CustomerDto>.CreateFrom(page, customer => customer.ToDto()));
+        })
+        .Produces<PageDto<CustomerDto>>()
+        .WithSummary("Get customers")
+        .WithName("GetCustomers");
+
         group.MapGet("/{id:int}", async (int id, ISalesService salesService, CancellationToken ct) =>
         {
             var customer = await salesService.GetCustomerAsync(id, ct);
-            return customer.ToOk(x => x.ToDto());
+            return customer.ToOk(customer => customer.ToDto());
         })
         .Produces<CustomerDto>()
         .WithSummary("Get customer")
