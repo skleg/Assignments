@@ -1,7 +1,5 @@
 ### Cloud Sales System Technical Exercise 
 
-This is a coding excercise project for the employment at Crayon.
-
 This is a coding exercise (not pseudo coding). For each feature you have freedom to implement it in a way you think customer would mostly benefit from it. Commit the final solution to GitHub repository and share the link with us. The submitted code should be production ready.
 For tech stack, please go with.Net and SQL.
 
