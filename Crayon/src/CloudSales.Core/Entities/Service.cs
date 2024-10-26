@@ -1,4 +1,4 @@
-namespace CloudSales.Core.Models;
+namespace CloudSales.Core.Entities;
 
 public class Service
 {

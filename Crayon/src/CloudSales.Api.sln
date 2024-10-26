@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudSales.Core", "CloudSal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudSales.Application", "CloudSales.Application\CloudSales.Application.csproj", "{BFD40236-2F1D-4C8D-9616-5EA307EA70D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudSales.Persistence", "CloudSales.Persistence\CloudSales.Persistence.csproj", "{CD029502-0B88-4E49-8231-8F00320AB3B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{BFD40236-2F1D-4C8D-9616-5EA307EA70D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFD40236-2F1D-4C8D-9616-5EA307EA70D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFD40236-2F1D-4C8D-9616-5EA307EA70D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD029502-0B88-4E49-8231-8F00320AB3B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD029502-0B88-4E49-8231-8F00320AB3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD029502-0B88-4E49-8231-8F00320AB3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD029502-0B88-4E49-8231-8F00320AB3B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
