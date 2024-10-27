@@ -1,4 +1,5 @@
 using CloudSales.Api.Authentication;
+using CloudSales.Api.Services;
 using CloudSales.Application.Services;
 using CloudSales.Core.Interfaces;
 using CloudSales.Persistence.Repository;
@@ -14,6 +15,7 @@ public static class ServicesExtensions
         builder.Services.AddScoped<TenantContext>();
         builder.Services.AddScoped<ISalesRepository, SalesRepository>();
         builder.Services.AddScoped<ISalesService, SalesService>();
+        builder.Services.AddScoped<ICloudService, CloudServiceMock>();
 
         return builder;
     }

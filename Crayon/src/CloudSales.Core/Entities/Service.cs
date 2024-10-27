@@ -2,7 +2,7 @@ namespace CloudSales.Core.Entities;
 
 public class Service
 {
-    public int ServiceId { get; set;}
-    public string ServiceName { get; set;} = "";
-    public decimal Price { get; set; }
+    public int ServiceId { get; init;}
+    public string ServiceName { get; init;} = "";
+    public decimal Price { get; init; }
 }
