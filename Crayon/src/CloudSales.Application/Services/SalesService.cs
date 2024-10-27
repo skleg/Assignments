@@ -102,9 +102,6 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (dto.NumberOfMonths <= 0)
             return LicenseErrors.InvalidNumberOfMonths;
 
-        if (dto.StartDate < DateTime.UtcNow)
-            return LicenseErrors.InvalidStartDate;
-        
         var account = await Repository.GetAccountAsync(dto.AccountId, ct);
         if (account is null)
             return AccountErrors.NotFound;
@@ -117,17 +114,20 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (license is not null)
             return LicenseErrors.AlreadyExists;
 
+        var receipt = await CloudService.PurchaseServiceAsync(
+            new PurchaseRequest(service.ServiceId, account.UserName, dto.NumberOfLicenses, dto.NumberOfMonths), 
+            ct);
+
         license = new License
         {
             AccountId = account.AccountId,
-
-            ServiceId = service.ServiceId,
-            ServiceName = service.ServiceName,
-            Price = service.Price,
-
-            Quantity = dto.NumberOfLicenses,
-            ExpiryDate = dto.StartDate.AddMonths(dto.NumberOfMonths),
             State = LicenseState.Active, 
+
+            ServiceId = receipt.ServiceId,
+            ServiceName = receipt.ServiceName,
+            Price = receipt.Price,
+            Quantity = receipt.NumberOfLicenses,
+            ExpiryDate = receipt.ValidUntil,
         };
 
         await Repository.CreateLicenseAsync(license, ct);

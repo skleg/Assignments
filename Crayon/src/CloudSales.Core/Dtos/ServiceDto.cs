@@ -1,6 +1,6 @@
-namespace CloudSales.Core.Entities;
+namespace CloudSales.Core.Dtos;
 
-public class Service
+public class ServiceDto
 {
     public int ServiceId { get; init;}
     public string ServiceName { get; init;} = "";

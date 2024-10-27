@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .ToTable("Accounts")
             .HasKey(x => x.AccountId);
 
+        modelBuilder.Entity<Account>().Property(x => x.UserName).IsRequired().HasMaxLength(100);
         modelBuilder.Entity<Account>().Property(x => x.FirstName).IsRequired().HasMaxLength(100);
         modelBuilder.Entity<Account>().Property(x => x.LastName).IsRequired().HasMaxLength(100);
         modelBuilder.Entity<Account>()

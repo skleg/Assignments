@@ -104,6 +104,7 @@ internal static class SeedData
             CustomerId = metrics.CustomerId,
             FirstName = "Alice",
             LastName = "Smith",
+            UserName = "alice@metrics.com",
         };
         dbContext.Accounts.Add(alice);
 
@@ -112,6 +113,7 @@ internal static class SeedData
             CustomerId = olson.CustomerId,
             FirstName = "Bob",
             LastName = "Olson",
+            UserName = "bob@olson.se",
         };
         dbContext.Accounts.Add(bob);
 
