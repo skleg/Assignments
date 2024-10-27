@@ -63,8 +63,16 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
 
         var expiryDate = license.ExpiryDate.AddMonths(withMonths);
 
-        await CloudService.UpdateSubscriptionAsync(
-            new UpdateSubscriptionRequest(account.UserName, license.ServiceId, license.Quantity, expiryDate), ct);
+        try
+        {
+            await CloudService.UpdateSubscriptionAsync(
+                new UpdateSubscriptionRequest(account.UserName, license.ServiceId, license.Quantity, expiryDate), ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to update expiry date on subscription for account {AccountId} and service {ServiceId}", account.AccountId, license.ServiceId);
+            return LicenseErrors.FailedToUpdateSubscription;
+        }
 
         license.ExpiryDate = expiryDate;
         if (license.State == LicenseState.Expired && license.ExpiryDate > DateTime.UtcNow)
@@ -85,8 +93,16 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (account is null)
             return AccountErrors.NotFound;
 
-        await CloudService.CancelSubscriptionAsync(
-            new CancelSubscriptionRequest(account.UserName, license.ServiceId), ct);
+        try
+        {
+            await CloudService.CancelSubscriptionAsync(
+                new CancelSubscriptionRequest(account.UserName, license.ServiceId), ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to cancel a subscription for account {AccountId} and service {ServiceId}", account.AccountId, license.ServiceId);
+            return LicenseErrors.FailedToUpdateSubscription;
+        }
 
         await Repository.DeleteLicenseAsync(license, ct);
         return Result.Deleted;
@@ -108,8 +124,16 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (account is null)
             return AccountErrors.NotFound;
 
-        await CloudService.UpdateSubscriptionAsync(
-            new UpdateSubscriptionRequest(account.UserName, license.ServiceId, numberOfLicenses, license.ExpiryDate), ct);
+        try
+        {
+            await CloudService.UpdateSubscriptionAsync(
+                new UpdateSubscriptionRequest(account.UserName, license.ServiceId, numberOfLicenses, license.ExpiryDate), ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to change a number of users on subscription for account {AccountId} and service {ServiceId}", account.AccountId, license.ServiceId);
+            return LicenseErrors.FailedToUpdateSubscription;
+        }
 
         license.Quantity = numberOfLicenses;
         await Repository.UpdateLicenseAsync(license, ct);
@@ -147,8 +171,8 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to purchase license for service {ServiceId}", service.ServiceId);
-            return LicenseErrors.PurchaseFailed;
+            Logger.LogError(ex, "Failed to create a subscription for account {AccountId} and service {ServiceId}", account.AccountId, service.ServiceId);
+            return LicenseErrors.FailedToCreateSubscription;
         }
 
         license = new License
