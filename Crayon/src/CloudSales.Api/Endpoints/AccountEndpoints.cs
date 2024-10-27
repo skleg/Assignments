@@ -12,7 +12,7 @@ public static class AccountEndpoints
     {
         var group = builder.MapGroup("/api/accounts")
             .WithTags("Accounts")
-            .RequireAuthorization();
+            .RequireAuthorization("customer");
 
         group.MapGet("/", async (int pageNo,
                                  int pageSize,
@@ -20,9 +20,6 @@ public static class AccountEndpoints
                                  ISalesService salesService,
                                  CancellationToken ct) =>
         {
-            if (!tenantContext.IsValidCustomer)
-                return Results.Unauthorized();
-
             var accounts = await salesService.GetAccountsAsync(tenantContext.CustomerId, pageNo, pageSize, ct);
             return accounts.ToOk(page => PageDto<AccountDto>.CreateFrom(page, account => account.ToDto()));
         })

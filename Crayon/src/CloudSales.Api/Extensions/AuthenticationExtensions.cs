@@ -29,6 +29,10 @@ public static class AuthenticationExtensions
                 };
             });
 
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("customer", policy => policy.RequireClaim("CustomerId"))
+            .AddPolicy("account", policy => policy.RequireClaim("AccountId"));
+
         return builder;
     }
 }

@@ -18,7 +18,11 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         var query = dbContext.Accounts.Where(x => x.CustomerId == customerId);
 
         return new EntityPage<Account>(
-            await query.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await query
+                .OrderBy(x => x.AccountId)
+                .Skip(pagination.Offset)
+                .Take(pagination.PageSize)
+                .ToListAsync(ct),
             await query.CountAsync(ct),
             pagination.PageNo,
             pagination.PageSize);
@@ -32,7 +36,11 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
     public async Task<EntityPage<Customer>> GetCustomersAsync(Pagination pagination, CancellationToken ct)
     {
         return new EntityPage<Customer>(
-            await dbContext.Customers.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await dbContext.Customers
+                .OrderBy(x => x.CustomerId)
+                .Skip(pagination.Offset)
+                .Take(pagination.PageSize)
+                .ToListAsync(ct),
             await dbContext.Customers.CountAsync(ct),
             pagination.PageNo,
             pagination.PageSize);
@@ -48,7 +56,11 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         var query = dbContext.Licenses.Where(x => x.AccountId == accountId);
 
         return new EntityPage<License>(
-            await query.Skip(pagination.Offset).Take(pagination.PageSize).ToListAsync(ct),
+            await query
+                .OrderBy(x => x.ServiceName)
+                .Skip(pagination.Offset)
+                .Take(pagination.PageSize)
+                .ToListAsync(ct),
             await query.CountAsync(ct),
             pagination.PageNo,
             pagination.PageSize);
