@@ -21,21 +21,44 @@ public class CloudServiceMock : ICloudService
         return Task.FromResult(_services.ToList());
     }
 
-    public Task<PurchaseReceiptDto> PurchaseServiceAsync(PurchaseRequest request, CancellationToken ct = default)
+    public Task<PurchaseReceiptDto> CreateSubscriptionAsync(CreateSubscriptionRequest request, CancellationToken ct = default)
     {
-        var service = _services.FirstOrDefault(x => x.ServiceId == request.ServiceId);
-        if (service is null)
+        var service = _services.FirstOrDefault(x => x.ServiceId == request.ServiceId) ?? 
             throw new InvalidOperationException("Service not found");
 
-        return Task.FromResult(new PurchaseReceiptDto
-        {
-            ServiceId = service.ServiceId,
-            ServiceName = service.ServiceName,
-            Price = service.Price,
-            UserName = request.UserName,
-            NumberOfLicenses = request.NumberOfLicenses,
-            ValidFrom = DateTime.UtcNow.Date,
-            ValidUntil = DateTime.UtcNow.Date.AddMonths(request.NumberOfMonths),
-        });
+        return Task.FromResult(
+            new PurchaseReceiptDto
+            {
+                ServiceId = service.ServiceId,
+                ServiceName = service.ServiceName,
+                Price = service.Price,
+                UserName = request.UserName,
+                NumberOfLicenses = request.NumberOfLicenses,
+                ValidFrom = DateTime.UtcNow.Date,
+                ValidUntil = DateTime.UtcNow.Date.AddMonths(request.NumberOfMonths),
+            });
+    }
+
+    public Task<PurchaseReceiptDto> UpdateSubscriptionAsync(UpdateSubscriptionRequest request, CancellationToken ct = default)
+    {
+        var service = _services.FirstOrDefault(x => x.ServiceId == request.ServiceId) ?? 
+            throw new InvalidOperationException("Service not found");
+
+        return Task.FromResult(
+            new PurchaseReceiptDto
+            {
+                ServiceId = service.ServiceId,
+                ServiceName = service.ServiceName,
+                Price = service.Price,
+                UserName = request.UserName,
+                NumberOfLicenses = request.NumberOfLicenses,
+                ValidFrom = DateTime.UtcNow.Date,
+                ValidUntil = request.ValidUntil,
+            });
+    }
+
+    public Task CancelSubscriptionAsync(CancelSubscriptionRequest request, CancellationToken ct = default)
+    {
+        return Task.CompletedTask;
     }
 }

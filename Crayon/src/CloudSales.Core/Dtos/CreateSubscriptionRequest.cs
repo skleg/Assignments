@@ -1,6 +1,6 @@
 namespace CloudSales.Core.Dtos;
 
-public record PurchaseRequest(
+public record CreateSubscriptionRequest(
     int ServiceId,
     string UserName,
     int NumberOfLicenses,

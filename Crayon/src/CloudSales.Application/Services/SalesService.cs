@@ -50,15 +50,23 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
 
     public async Task<ErrorOr<License>> ExtendLicenseAsync(int accountId, int serviceId, int withMonths, CancellationToken ct = default)
     {
+        if (withMonths <= 0)
+            return LicenseErrors.InvalidNumberOfMonths;
+        
         var license = await Repository.GetLicenseAsync(accountId, serviceId, ct);
         if (license is null)
             return LicenseErrors.NotFound;
 
-        if (withMonths <= 0)
-            return LicenseErrors.InvalidNumberOfMonths;
-        
-        license.ExpiryDate = license.ExpiryDate.AddMonths(withMonths);
+        var account = await Repository.GetAccountAsync(accountId, ct);
+        if (account is null)
+            return AccountErrors.NotFound;
 
+        var expiryDate = license.ExpiryDate.AddMonths(withMonths);
+
+        await CloudService.UpdateSubscriptionAsync(
+            new UpdateSubscriptionRequest(account.UserName, license.ServiceId, license.Quantity, expiryDate), ct);
+
+        license.ExpiryDate = expiryDate;
         if (license.State == LicenseState.Expired && license.ExpiryDate > DateTime.UtcNow)
             license.State = LicenseState.Active;
 
@@ -73,12 +81,22 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (license is null)
             return LicenseErrors.NotFound;
 
-        await Repository.DeleteLicenseAsync(license, ct);        
+        var account = await Repository.GetAccountAsync(accountId, ct);
+        if (account is null)
+            return AccountErrors.NotFound;
+
+        await CloudService.CancelSubscriptionAsync(
+            new CancelSubscriptionRequest(account.UserName, license.ServiceId), ct);
+
+        await Repository.DeleteLicenseAsync(license, ct);
         return Result.Deleted;
     }
 
     public async Task<ErrorOr<License>> UpdateNumberOfLicensesAsync(int accountId, int serviceId, int numberOfLicenses, CancellationToken ct = default)
     {
+        if (numberOfLicenses <= 0)
+            return LicenseErrors.InvalidNumberOfLicenses;
+        
         var license = await Repository.GetLicenseAsync(accountId, serviceId, ct);
         if (license is null)
             return LicenseErrors.NotFound;
@@ -86,9 +104,13 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (license.State != LicenseState.Active)
             return LicenseErrors.NotActive;
 
-        if (numberOfLicenses <= 0)
-            return LicenseErrors.InvalidNumberOfLicenses;
-        
+        var account = await Repository.GetAccountAsync(accountId, ct);
+        if (account is null)
+            return AccountErrors.NotFound;
+
+        await CloudService.UpdateSubscriptionAsync(
+            new UpdateSubscriptionRequest(account.UserName, license.ServiceId, numberOfLicenses, license.ExpiryDate), ct);
+
         license.Quantity = numberOfLicenses;
         await Repository.UpdateLicenseAsync(license, ct);
         
@@ -119,8 +141,8 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
 
         try
         {
-            receipt = await CloudService.PurchaseServiceAsync(
-                new PurchaseRequest(service.ServiceId, account.UserName, dto.NumberOfLicenses, dto.NumberOfMonths), 
+            receipt = await CloudService.CreateSubscriptionAsync(
+                new CreateSubscriptionRequest(service.ServiceId, account.UserName, dto.NumberOfLicenses, dto.NumberOfMonths), 
                 ct);
         }
         catch (Exception ex)
