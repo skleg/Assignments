@@ -1,3 +1,3 @@
 namespace CloudSales.Authentication.Contracts;
 
-public record CustomerDto(int Id, string Name);
+public record CustomerDto(int Id, string Name, string UserName);

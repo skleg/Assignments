@@ -5,5 +5,8 @@ namespace CloudSales.Authentication.Extensions;
 
 public static class MappingExtensions
 {
-    public static CustomerDto ToDto(this Customer customer) => new(customer.CustomerId, customer.CustomerName);
+    public static CustomerDto ToDto(this Customer customer) => 
+        new(customer.CustomerId, 
+            customer.CustomerName, 
+            customer.UserName);
 }
