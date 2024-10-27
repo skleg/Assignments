@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using CloudSales.Core.Shared;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Dtos;
+using ErrorOr;
 
 namespace CloudSales.Application.Tests;
 
@@ -21,6 +22,8 @@ public class SalesServiceTests
     {
         _sut = new SalesService(_repositoryMock.Object, _cloudMock.Object, _loggerMock.Object);
     }
+
+#region GetAccountsAsync
 
     [Theory]
     [InlineData(0, 0)]
@@ -51,7 +54,7 @@ public class SalesServiceTests
         int pageNo = 1;
         int pageSize = 10;
 
-        _repositoryMock.Setup(x => x.GetCustomerAsync(customerId, CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetCustomerAsync(customerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as Customer);
 
         // Act
@@ -62,13 +65,16 @@ public class SalesServiceTests
         result.FirstError.Code.Should().Be(CustomerErrors.NotFound.Code);
     }
 
+#endregion
+#region GetAccountAsync
+
     [Fact]
     public async void GetAccountAsync_ShouldReturnAccountNotFound_WhenAccountDoesNotExist()
     {
         // Arrange
         var accountId = 1;
 
-        _repositoryMock.Setup(x => x.GetAccountAsync(accountId, CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetAccountAsync(accountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as Account);
 
         // Act
@@ -78,6 +84,9 @@ public class SalesServiceTests
         result.FirstError.Should().NotBeNull();
         result.FirstError.Code.Should().Be(AccountErrors.NotFound.Code);
     }
+
+#endregion
+#region GetLicensesAsync
 
     [Theory]
     [InlineData(0, 0)]
@@ -107,7 +116,7 @@ public class SalesServiceTests
         int pageNo = 1;
         int pageSize = 10;
 
-        _repositoryMock.Setup(x => x.GetAccountAsync(accountId, CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetAccountAsync(accountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as Account);
 
         // Act
@@ -118,11 +127,14 @@ public class SalesServiceTests
         result.FirstError.Code.Should().Be(AccountErrors.NotFound.Code);
     }
 
+#endregion
+#region GetLicenseAsync
+
     [Fact]
     public async void GetLicenseAsync_ShouldReturnLicenseNotFound_WhenLicenseDoesNotExist()
     {
         // Arrange
-        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as License);
 
         // Act
@@ -132,6 +144,9 @@ public class SalesServiceTests
         result.FirstError.Should().NotBeNull();
         result.FirstError.Code.Should().Be(LicenseErrors.NotFound.Code);
     }
+
+#endregion
+#region ExtendLicenseAsync
 
     [Theory]
     [InlineData(0)]
@@ -154,7 +169,7 @@ public class SalesServiceTests
         // Arrange
         int numberOfMonths = 1;
 
-        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as License);
 
         // Act
@@ -171,9 +186,9 @@ public class SalesServiceTests
         // Arrange
         int numberOfMonths = 1;
 
-        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateLicense());
-        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), CancellationToken.None))
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as Account);
         
         // Act
@@ -234,6 +249,93 @@ public class SalesServiceTests
         _repositoryMock.Verify(x => x.UpdateLicenseAsync(It.IsAny<License>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+#endregion
+#region CancelLicenseAsync
+
+    [Fact]
+    public async void CancelLicenseAsync_ShouldReturnLicenseNotFound_WhenLicenseDoesNotExist()
+    {
+        // Arrange
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(null as License);
+
+        // Act
+        var result = await _sut.CancelLicenseAsync(It.IsAny<int>(), It.IsAny<int>());
+
+        // Assert
+        result.FirstError.Should().NotBeNull();
+        result.FirstError.Code.Should().Be(LicenseErrors.NotFound.Code);
+    }
+
+    [Fact]
+    public async void CancelLicenseAsync_ShouldReturnAccountNotFound_WhenAccountDoesNotExist()
+    {
+        // Arrange
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateLicense());
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(null as Account);
+        
+        // Act
+        var result = await _sut.CancelLicenseAsync(It.IsAny<int>(), It.IsAny<int>());
+
+        // Assert
+        result.FirstError.Should().NotBeNull();
+        result.FirstError.Code.Should().Be(AccountErrors.NotFound.Code);
+    }
+
+    [Fact]
+    public async void CancelLicenseAsync_ShouldReturnError_WhenCloudServiceThrowsAnException()
+    {
+        // Arrange
+        var account = CreateAccount();
+        var license = CreateLicense();
+
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(license);
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(account);
+        _cloudMock.Setup(x => x.CancelSubscriptionAsync(It.IsAny<CancelSubscriptionRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception());
+        
+        // Act
+        var result = await _sut.CancelLicenseAsync(It.IsAny<int>(), It.IsAny<int>());
+
+        // Assert
+        result.FirstError.Should().NotBeNull();
+        result.FirstError.Code.Should().Be(LicenseErrors.FailedToUpdateSubscription.Code);
+    }
+
+    [Fact]
+    public async void CancelLicenseAsync_ShouldUpdateLicense()
+    {
+        // Arrange
+        var account = CreateAccount();
+        var license = CreateLicense();
+        int numberOfMonths = 1;
+        var expiryDate = license.ExpiryDate.AddMonths(numberOfMonths);
+
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(license);
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(account);
+        
+        // Act
+        var result = await _sut.CancelLicenseAsync(It.IsAny<int>(), It.IsAny<int>());
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.Should().Be(Result.Deleted);
+
+        _cloudMock.Verify(x => x.CancelSubscriptionAsync(It.IsAny<CancelSubscriptionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(x => x.DeleteLicenseAsync(It.IsAny<License>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+#endregion
+
+// TODO: Create UpdateNumberOfLicensesAsync unit tests
+// TODO: Create CreateLicenseAsync unit tests
+
     private static License CreateLicense()
     {
         return new License
@@ -258,9 +360,4 @@ public class SalesServiceTests
             UserName = "user@example.com",
         };
     }
-
-    // _repositoryMock.Setup(x => x.GetAccountsAsync(customerId, new Pagination(pageNo, pageSize), CancellationToken.None))
-    //     .ReturnsAsync(new EntityPage<Account>([], 0, pageNo, pageSize));
-
-    // var request = new UpdateSubscriptionRequest(account.UserName, license.ServiceId, license.Quantity, license.ExpiryDate);
 }
