@@ -10,5 +10,6 @@ public interface ISalesService
     Task<ErrorOr<Customer>> GetCustomerAsync(int customerId, CancellationToken ct = default);
     Task<ErrorOr<EntityPage<Account>>> GetAccountsAsync(int customerId, int pageNo, int pageSize, CancellationToken ct = default);
     Task<ErrorOr<Account>> GetAccountAsync(int accountId, CancellationToken ct = default);
+    Task<ErrorOr<EntityPage<License>>> GetAccountLicensesAsync(int accountId, int pageNo, int pageSize, CancellationToken ct = default);
 
 }

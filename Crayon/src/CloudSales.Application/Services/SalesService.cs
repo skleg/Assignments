@@ -41,4 +41,17 @@ public class SalesService(ISalesRepository Repository) : ISalesService
         var account = await Repository.GetAccountAsync(accountId, ct);
         return account is null ? AccountErrors.NotFound : account;
     }
+
+    public async Task<ErrorOr<EntityPage<License>>> GetAccountLicensesAsync(int accountId, int pageNo, int pageSize, CancellationToken ct = default)
+    {
+        var pagination = new Pagination(pageNo, pageSize);
+        if (!pagination.IsValid)
+            return CommonErrors.InvalidPagination;
+
+        var account = await Repository.GetAccountAsync(accountId, ct);
+        if (account is null)
+            return AccountErrors.NotFound;
+        
+        return await Repository.GetAccountLicensesAsync(account.AccountId, pagination, ct);
+    }
 }
