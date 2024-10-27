@@ -23,7 +23,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapCloudEndpoints();
+app.MapAccountEndpoints()
+    .MapServiceEndpoints();
 
 await app.UseCloudDatabaseAsync();
 
