@@ -1,4 +1,5 @@
 using System.Data;
+using CloudSales.Core.Dtos;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Shared;
 using CloudSales.Persistence.Database;
@@ -68,13 +69,13 @@ internal static class SeedData
             return;
 
         // Services
-        var microsoftOffice = new Service
+        var microsoftOffice = new ServiceDto
         {
             ServiceId = 1,
             ServiceName = "Microsoft Office 365",
             Price = 100,
         };
-        var visualStudio = new Service
+        var visualStudio = new ServiceDto
         {
             ServiceId = 2,
             ServiceName = "Visual Studio 2022",

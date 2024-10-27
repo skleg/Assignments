@@ -1,4 +1,5 @@
 using CloudSales.Api.Contracts;
+using CloudSales.Core.Dtos;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Shared;
 
@@ -16,6 +17,6 @@ public static class MappingExtensions
             license.ExpiryDate, 
             license.State == LicenseState.Active && license.ExpiryDate > DateTime.UtcNow);
 
-    public static ServiceResponse ToResponse(this Service service) => 
+    public static ServiceResponse ToResponse(this ServiceDto service) => 
         new(service.ServiceId, service.ServiceName, service.Price);
 }

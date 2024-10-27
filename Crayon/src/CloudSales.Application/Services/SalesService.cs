@@ -4,10 +4,11 @@ using CloudSales.Core.Errors;
 using CloudSales.Core.Interfaces;
 using CloudSales.Core.Shared;
 using ErrorOr;
+using Microsoft.Extensions.Logging;
 
 namespace CloudSales.Application.Services;
 
-public class SalesService(ISalesRepository Repository, ICloudService CloudService) : ISalesService
+public class SalesService(ISalesRepository Repository, ICloudService CloudService, ILogger<SalesService> Logger) : ISalesService
 {
     public async Task<ErrorOr<EntityPage<Account>>> GetAccountsAsync(int customerId, int pageNo, int pageSize, CancellationToken ct = default)
     {
@@ -114,9 +115,19 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
         if (license is not null)
             return LicenseErrors.AlreadyExists;
 
-        var receipt = await CloudService.PurchaseServiceAsync(
-            new PurchaseRequest(service.ServiceId, account.UserName, dto.NumberOfLicenses, dto.NumberOfMonths), 
-            ct);
+        PurchaseReceiptDto receipt;
+
+        try
+        {
+            receipt = await CloudService.PurchaseServiceAsync(
+                new PurchaseRequest(service.ServiceId, account.UserName, dto.NumberOfLicenses, dto.NumberOfMonths), 
+                ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to purchase license for service {ServiceId}", service.ServiceId);
+            return LicenseErrors.PurchaseFailed;
+        }
 
         license = new License
         {
@@ -128,7 +139,7 @@ public class SalesService(ISalesRepository Repository, ICloudService CloudServic
             Price = receipt.Price,
             Quantity = receipt.NumberOfLicenses,
             ExpiryDate = receipt.ValidUntil,
-        };
+        };            
 
         await Repository.CreateLicenseAsync(license, ct);
 

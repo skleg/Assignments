@@ -61,7 +61,7 @@ public static class AccountEndpoints
             var license = await salesService.GetAccountAsync(accountId, ct)
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
                 .ThenAsync(account => salesService.CreateLicenseAsync(
-                    new CreateLicenseDto(account.AccountId, request.ServiceId, request.StartDate, request.NumberOfMonths, request.NumberOfLicenses), 
+                    new CreateLicenseDto(account.AccountId, request.ServiceId, request.NumberOfMonths, request.NumberOfLicenses), 
                     ct));
 
             return license.ToOk(x => x.ToResponse());
