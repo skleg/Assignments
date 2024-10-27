@@ -50,6 +50,23 @@ public static class AccountEndpoints
         .WithSummary("Returns licenses for an account")
         .WithName("GetLicenses");
 
+        group.MapGet("/{accountId:int}/licenses/{serviceId:int}", async (
+            int accountId,
+            int serviceId,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var license = await salesService.GetAccountAsync(accountId, ct)
+                .Then(account => ValidateCustomerAccount(account, tenantContext))
+                .ThenAsync(x => salesService.GetLicenseAsync(accountId, serviceId, ct));
+            
+            return license.ToOk(x => x.ToDto());
+        })
+        .Produces<LicenseDto>()
+        .WithSummary("Returns user license")
+        .WithName("GetLicense");
+
         group.MapPost("/{accountId:int}/licenses/{serviceId:int}/extend", async (
             int accountId,
             int serviceId,
