@@ -23,6 +23,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             throw new InvalidOperationException("SalesDb connection string is not configured."));
 });
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<TenantContext>();
 builder.Services.AddScoped<ISalesRepository, SalesRepository>();
 builder.Services.AddScoped<ISalesService, SalesService>();
 builder.Services.AddScoped<TokenGenerator>();

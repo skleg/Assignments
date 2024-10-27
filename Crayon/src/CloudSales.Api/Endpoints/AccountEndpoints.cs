@@ -1,5 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using CloudSales.Api.Authentication;
 using CloudSales.Api.Contracts;
 using CloudSales.Api.Extensions;
 using CloudSales.Core.Interfaces;
@@ -17,17 +16,14 @@ public static class AccountEndpoints
 
         group.MapGet("/", async (int pageNo,
                                  int pageSize,
-                                 ClaimsPrincipal principal,
+                                 TenantContext tenantContext,
                                  ISalesService salesService,
                                  CancellationToken ct) =>
         {
-            // Extract customer Id from user claims
-            var customerClaimValue = principal.FindFirst("CustomerId")?.Value;
-            if (string.IsNullOrEmpty(customerClaimValue))
+            if (!tenantContext.IsValidCustomer)
                 return Results.Unauthorized();
 
-            int customerId = int.Parse(customerClaimValue);
-            var accounts = await salesService.GetAccountsAsync(customerId, pageNo, pageSize, ct);
+            var accounts = await salesService.GetAccountsAsync(tenantContext.CustomerId, pageNo, pageSize, ct);
             return accounts.ToOk(page => PageDto<AccountDto>.CreateFrom(page, account => account.ToDto()));
         })
         .Produces<PageDto<AccountDto>>()
