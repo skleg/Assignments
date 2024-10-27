@@ -10,9 +10,9 @@ using ErrorOrAspNetCoreExtensions;
 
 namespace CloudSales.Api.Endpoints;
 
-public static class AccountEndpoints
+public static class CloudEndpoints
 {
-    public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder builder)
+    public static IEndpointRouteBuilder MapCloudEndpoints(this IEndpointRouteBuilder builder)
     {
         var group = builder.MapGroup("/api/accounts")
             .WithTags("Accounts")

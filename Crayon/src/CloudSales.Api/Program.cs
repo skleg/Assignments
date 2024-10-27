@@ -15,21 +15,16 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (!app.Environment.IsDevelopment())
-{
-    await app.Services.ApplyMigrations();
-}
-
 if (app.Environment.IsDevelopment())
 {
-    await app.Services.SeedInitialData();
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-app.MapAccountEndpoints();
+app.MapCloudEndpoints();
 
-app.Run();
+await app.UseCloudDatabaseAsync();
+
+await app.RunAsync();

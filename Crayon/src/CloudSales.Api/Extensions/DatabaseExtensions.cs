@@ -16,4 +16,13 @@ public static class DatabaseExtensions
 
         return builder;
     }
+
+    public static async Task UseCloudDatabaseAsync(this WebApplication app)
+    {
+        if (!app.Environment.IsDevelopment())
+            await app.Services.ApplyMigrations();
+
+        if (app.Environment.IsDevelopment())
+            await app.Services.SeedInitialData();
+    }
 }
