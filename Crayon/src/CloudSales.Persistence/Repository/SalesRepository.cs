@@ -8,9 +8,9 @@ namespace CloudSales.Persistence.Repository;
 
 public class SalesRepository(AppDbContext dbContext) : ISalesRepository
 {
-    public Task<Account?> GetAccountAsync(int accountId, CancellationToken ct)
+    public async Task<Account?> GetAccountAsync(int accountId, CancellationToken ct)
     {
-        return dbContext.Accounts.FirstOrDefaultAsync(x => x.AccountId == accountId, ct);
+        return await dbContext.Accounts.FirstOrDefaultAsync(x => x.AccountId == accountId, ct);
     }
 
     public async Task<EntityPage<Account>> GetAccountsAsync(int customerId, Pagination pagination, CancellationToken ct)
@@ -28,9 +28,9 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
             pagination.PageSize);
     }
 
-    public Task<Customer?> GetCustomerAsync(int customerId, CancellationToken ct)
+    public async Task<Customer?> GetCustomerAsync(int customerId, CancellationToken ct)
     {
-        return dbContext.Customers.FirstOrDefaultAsync(x => x.CustomerId == customerId, ct);
+        return await dbContext.Customers.FirstOrDefaultAsync(x => x.CustomerId == customerId, ct);
     }
 
     public async Task<EntityPage<Customer>> GetCustomersAsync(Pagination pagination, CancellationToken ct)
@@ -46,9 +46,9 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
             pagination.PageSize);
     }
 
-    public Task<License?> GetLicenseAsync(int accountId, int serviceId, CancellationToken ct)
+    public async Task<License?> GetLicenseAsync(int accountId, int serviceId, CancellationToken ct)
     {
-        return dbContext.Licenses.FirstOrDefaultAsync(x => x.AccountId == accountId && x.ServiceId == serviceId, ct);
+        return await dbContext.Licenses.FirstOrDefaultAsync(x => x.AccountId == accountId && x.ServiceId == serviceId, ct);
     }
 
     public async Task<EntityPage<License>> GetAccountLicensesAsync(int accountId, Pagination pagination, CancellationToken ct)
@@ -66,15 +66,21 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
             pagination.PageSize);
     }
 
-    public Task UpdateAccountAsync(Account account, CancellationToken ct)
+    public async Task UpdateAccountAsync(Account account, CancellationToken ct)
     {
         dbContext.Accounts.Update(account);
-        return dbContext.SaveChangesAsync(ct);
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    public Task UpdateLicenseAsync(License license, CancellationToken ct)
+    public async Task UpdateLicenseAsync(License license, CancellationToken ct)
     {
         dbContext.Licenses.Update(license);
-        return dbContext.SaveChangesAsync(ct);
+        await dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteLicenseAsync(License license, CancellationToken ct)
+    {
+        dbContext.Licenses.Remove(license);
+        await dbContext.SaveChangesAsync(ct);
     }
 }

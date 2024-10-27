@@ -6,10 +6,11 @@ namespace CloudSales.Core.Interfaces;
 
 public interface ISalesService
 {
-    Task<ErrorOr<EntityPage<Customer>>> GetCustomersAsync(int pageNo, int pageSize, CancellationToken ct = default);
-    Task<ErrorOr<Customer>> GetCustomerAsync(int customerId, CancellationToken ct = default);
     Task<ErrorOr<EntityPage<Account>>> GetAccountsAsync(int customerId, int pageNo, int pageSize, CancellationToken ct = default);
     Task<ErrorOr<Account>> GetAccountAsync(int accountId, CancellationToken ct = default);
-    Task<ErrorOr<EntityPage<License>>> GetAccountLicensesAsync(int accountId, int pageNo, int pageSize, CancellationToken ct = default);
+    Task<ErrorOr<EntityPage<License>>> GetLicensesAsync(int accountId, int pageNo, int pageSize, CancellationToken ct = default);
+    Task<ErrorOr<License>> GetLicenseAsync(int accountId, int serviceId, CancellationToken ct = default);
+    Task<ErrorOr<License>> ExtendLicenseAsync(int accountId, int serviceId, int withMonths, CancellationToken ct = default);
+    Task<ErrorOr<Deleted>> CancelLicenseAsync(int accountId, int serviceId, CancellationToken ct = default);
 
 }

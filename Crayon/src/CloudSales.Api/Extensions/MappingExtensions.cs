@@ -12,5 +12,5 @@ public static class MappingExtensions
             license.ServiceName, 
             license.Quantity, 
             license.ExpiryDate, 
-            license.State == Core.Shared.LicenseState.Active);
+            license.State == Core.Shared.LicenseState.Active && license.ExpiryDate > DateTime.UtcNow);
 }

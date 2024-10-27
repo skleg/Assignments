@@ -1,5 +1,6 @@
 using CloudSales.Api.Authentication;
 using CloudSales.Api.Contracts;
+using CloudSales.Api.Contracts.Requests;
 using CloudSales.Api.Extensions;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Errors;
@@ -28,8 +29,8 @@ public static class AccountEndpoints
             return accounts.ToOk(page => PageDto<AccountDto>.CreateFrom(page, account => account.ToDto()));
         })
         .Produces<PageDto<AccountDto>>()
-        .WithSummary("Get customer accounts")
-        .WithName("GetCustomerAccounts");
+        .WithSummary("Returns customer accounts")
+        .WithName("GetAccounts");
 
         group.MapGet("/{accountId:int}/licenses", async (
             int accountId,
@@ -41,13 +42,48 @@ public static class AccountEndpoints
         {
             var licenses = await salesService.GetAccountAsync(accountId, ct)
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
-                .ThenAsync(x => salesService.GetAccountLicensesAsync(accountId, pageNo, pageSize, ct));
+                .ThenAsync(x => salesService.GetLicensesAsync(accountId, pageNo, pageSize, ct));
             
             return licenses.ToOk(page => PageDto<LicenseDto>.CreateFrom(page, license => license.ToDto()));
         })
         .Produces<PageDto<LicenseDto>>()
-        .WithSummary("Get account licenses")
-        .WithName("GetAccountLicenses");
+        .WithSummary("Returns licenses for an account")
+        .WithName("GetLicenses");
+
+        group.MapPost("/{accountId:int}/licenses/{serviceId:int}/extend", async (
+            int accountId,
+            int serviceId,
+            ExtendLicenseRequest request,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var license = await salesService.GetAccountAsync(accountId, ct)
+                .Then(account => ValidateCustomerAccount(account, tenantContext))
+                .ThenAsync(x => salesService.ExtendLicenseAsync(accountId, serviceId, request.NumberOfMonths, ct));
+            
+            return license.ToOk(x => x.ToDto());
+        })
+        .Produces<LicenseDto>()
+        .WithSummary("Extends a license with specified number of months")
+        .WithName("ExtendLicense");
+
+        group.MapPost("/{accountId:int}/licenses/{serviceId:int}/cancel", async (
+            int accountId,
+            int serviceId,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var license = await salesService.GetAccountAsync(accountId, ct)
+                .Then(account => ValidateCustomerAccount(account, tenantContext))
+                .ThenAsync(x => salesService.CancelLicenseAsync(accountId, serviceId, ct));
+            
+            return license.ToNoContent();
+        })
+        .Produces(StatusCodes.Status204NoContent)
+        .WithSummary("Cancels a license")
+        .WithName("CancelLicense");
 
         return builder;
     }
