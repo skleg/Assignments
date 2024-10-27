@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudSales.Authentication", "CloudSales.Authentication\CloudSales.Authentication.csproj", "{EB0D21C4-316A-4D1E-B55D-83103AAEC672}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudSales.Persistence", "..\src\CloudSales.Persistence\CloudSales.Persistence.csproj", "{58497839-1D56-4BE5-BE96-161BDA98C37E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB0D21C4-316A-4D1E-B55D-83103AAEC672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB0D21C4-316A-4D1E-B55D-83103AAEC672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB0D21C4-316A-4D1E-B55D-83103AAEC672}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB0D21C4-316A-4D1E-B55D-83103AAEC672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58497839-1D56-4BE5-BE96-161BDA98C37E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58497839-1D56-4BE5-BE96-161BDA98C37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58497839-1D56-4BE5-BE96-161BDA98C37E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58497839-1D56-4BE5-BE96-161BDA98C37E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

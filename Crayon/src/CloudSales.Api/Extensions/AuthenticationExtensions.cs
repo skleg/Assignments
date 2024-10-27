@@ -7,8 +7,9 @@ namespace CloudSales.Api.Extensions;
 
 public static class AuthenticationExtensions
 {    
-    public static void AddAddJwtBearerAuthentication(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddCloudAuthentication(this WebApplicationBuilder builder)
     {
+        builder.Services.AddAuthorization();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(x => 
             {
@@ -27,5 +28,7 @@ public static class AuthenticationExtensions
                     ValidateIssuerSigningKey = true,
                 };
             });
+
+        return builder;
     }
 }

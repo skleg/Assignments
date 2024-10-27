@@ -1,4 +1,4 @@
-namespace CloudSales.Api.Contracts;
+namespace CloudSales.Authentication.Contracts;
 
 public class LoginRequest
 {

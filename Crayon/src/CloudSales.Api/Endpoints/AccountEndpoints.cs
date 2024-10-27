@@ -8,7 +8,7 @@ namespace CloudSales.Api.Endpoints;
 
 public static class AccountEndpoints
 {
-    public static void MapAccountEndpoints(this IEndpointRouteBuilder builder)
+    public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder builder)
     {
         var group = builder.MapGroup("/api/accounts")
             .WithTags("Accounts")
@@ -29,5 +29,7 @@ public static class AccountEndpoints
         .Produces<PageDto<AccountDto>>()
         .WithSummary("Get customer accounts")
         .WithName("GetCustomerAccounts");
+
+        return builder;
     }
 }

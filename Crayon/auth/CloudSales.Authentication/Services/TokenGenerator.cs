@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using CloudSales.Authentication.Models;
 using CloudSales.Core.Errors;
 using CloudSales.Persistence.Database;
 using ErrorOr;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CloudSales.Api.Authentication;
+namespace CloudSales.Authentication.Services;
 
 public class TokenGenerator(IOptions<AuthSettings> configurationOptions, AppDbContext dbContext)
 {
