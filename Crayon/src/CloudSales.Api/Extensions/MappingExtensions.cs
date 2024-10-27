@@ -1,16 +1,17 @@
 using CloudSales.Api.Contracts;
 using CloudSales.Core.Entities;
+using CloudSales.Core.Shared;
 
 namespace CloudSales.Api.Extensions;
 
 public static class MappingExtensions
 {
-    public static AccountDto ToDto(this Account account) => 
+    public static AccountResponse ToResponse(this Account account) => 
         new(account.AccountId, account.FirstName, account.LastName);
-    public static LicenseDto ToDto(this License license) => 
+    public static LicenseResponse ToResponse(this License license) => 
         new(license.ServiceId, 
             license.ServiceName, 
             license.Quantity, 
             license.ExpiryDate, 
-            license.State == Core.Shared.LicenseState.Active && license.ExpiryDate > DateTime.UtcNow);
+            license.State == LicenseState.Active && license.ExpiryDate > DateTime.UtcNow);
 }

@@ -14,6 +14,7 @@ public interface ISalesRepository
 
     public Task<EntityPage<License>> GetAccountLicensesAsync(int accountId, Pagination pagination, CancellationToken ct);
     public Task<License?> GetLicenseAsync(int accountId, int serviceId, CancellationToken ct);
+    public Task CreateLicenseAsync(License license, CancellationToken ct);
     public Task UpdateLicenseAsync(License license, CancellationToken ct);
     public Task DeleteLicenseAsync(License license, CancellationToken ct);
 }

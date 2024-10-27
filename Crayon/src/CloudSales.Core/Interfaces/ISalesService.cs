@@ -1,3 +1,4 @@
+using CloudSales.Core.Dtos;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Shared;
 using ErrorOr;
@@ -13,5 +14,6 @@ public interface ISalesService
     Task<ErrorOr<License>> ExtendLicenseAsync(int accountId, int serviceId, int withMonths, CancellationToken ct = default);
     Task<ErrorOr<Deleted>> CancelLicenseAsync(int accountId, int serviceId, CancellationToken ct = default);
     Task<ErrorOr<License>> UpdateNumberOfLicensesAsync(int accountId, int serviceId, int numberOfLicenses, CancellationToken ct = default);
+    Task<ErrorOr<License>> CreateLicenseAsync(CreateLicenseDto dto, CancellationToken ct = default);
 
 }

@@ -83,4 +83,10 @@ public class SalesRepository(AppDbContext dbContext) : ISalesRepository
         dbContext.Licenses.Remove(license);
         await dbContext.SaveChangesAsync(ct);
     }
+
+    public async Task CreateLicenseAsync(License license, CancellationToken ct)
+    {
+        dbContext.Licenses.Add(license);
+        await dbContext.SaveChangesAsync(ct);
+    }
 }

@@ -2,6 +2,7 @@ using CloudSales.Api.Authentication;
 using CloudSales.Api.Contracts;
 using CloudSales.Api.Contracts.Requests;
 using CloudSales.Api.Extensions;
+using CloudSales.Core.Dtos;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Errors;
 using CloudSales.Core.Interfaces;
@@ -26,9 +27,9 @@ public static class CloudEndpoints
             CancellationToken ct) =>
         {
             var accounts = await salesService.GetAccountsAsync(tenantContext.CustomerId, pageNo, pageSize, ct);
-            return accounts.ToOk(page => PageDto<AccountDto>.CreateFrom(page, account => account.ToDto()));
+            return accounts.ToOk(page => PageResponse<AccountResponse>.CreateFrom(page, account => account.ToResponse()));
         })
-        .Produces<PageDto<AccountDto>>()
+        .Produces<PageResponse<AccountResponse>>()
         .WithSummary("Returns customer accounts")
         .WithName("GetAccounts");
 
@@ -44,11 +45,30 @@ public static class CloudEndpoints
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
                 .ThenAsync(x => salesService.GetLicensesAsync(accountId, pageNo, pageSize, ct));
             
-            return licenses.ToOk(page => PageDto<LicenseDto>.CreateFrom(page, license => license.ToDto()));
+            return licenses.ToOk(page => PageResponse<LicenseResponse>.CreateFrom(page, license => license.ToResponse()));
         })
-        .Produces<PageDto<LicenseDto>>()
+        .Produces<PageResponse<LicenseResponse>>()
         .WithSummary("Returns licenses for an account")
         .WithName("GetLicenses");
+
+        group.MapPost("/{accountId:int}/licenses", async (
+            int accountId,
+            AddLicenseRequest request,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var license = await salesService.GetAccountAsync(accountId, ct)
+                .Then(account => ValidateCustomerAccount(account, tenantContext))
+                .ThenAsync(account => salesService.CreateLicenseAsync(
+                    new CreateLicenseDto(account.AccountId, request.ServiceId, request.StartDate, request.NumberOfMonths, request.NumberOfLicenses), 
+                    ct));
+
+            return license.ToOk(x => x.ToResponse());
+        })
+        .Produces<LicenseResponse>()
+        .WithSummary("Creates a new user license")
+        .WithName("AddLicense");
 
         group.MapGet("/{accountId:int}/licenses/{serviceId:int}", async (
             int accountId,
@@ -61,9 +81,9 @@ public static class CloudEndpoints
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
                 .ThenAsync(x => salesService.GetLicenseAsync(accountId, serviceId, ct));
             
-            return license.ToOk(x => x.ToDto());
+            return license.ToOk(x => x.ToResponse());
         })
-        .Produces<LicenseDto>()
+        .Produces<LicenseResponse>()
         .WithSummary("Returns user license")
         .WithName("GetLicense");
 
@@ -79,9 +99,9 @@ public static class CloudEndpoints
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
                 .ThenAsync(x => salesService.ExtendLicenseAsync(accountId, serviceId, request.NumberOfMonths, ct));
             
-            return license.ToOk(x => x.ToDto());
+            return license.ToOk(x => x.ToResponse());
         })
-        .Produces<LicenseDto>()
+        .Produces<LicenseResponse>()
         .WithSummary("Extends a license with specified number of months")
         .WithName("ExtendLicense");
 
@@ -114,9 +134,9 @@ public static class CloudEndpoints
                 .Then(account => ValidateCustomerAccount(account, tenantContext))
                 .ThenAsync(x => salesService.UpdateNumberOfLicensesAsync(accountId, serviceId, request.NumberOfLicenses, ct));
             
-            return license.ToOk(x => x.ToDto());
+            return license.ToOk(x => x.ToResponse());
         })
-        .Produces<LicenseDto>()
+        .Produces<LicenseResponse>()
         .WithSummary("Updates number of user licenses")
         .WithName("UpdateLicense");
 

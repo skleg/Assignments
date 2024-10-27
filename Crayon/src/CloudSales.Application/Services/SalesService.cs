@@ -1,3 +1,4 @@
+using CloudSales.Core.Dtos;
 using CloudSales.Core.Entities;
 using CloudSales.Core.Errors;
 using CloudSales.Core.Interfaces;
@@ -6,7 +7,7 @@ using ErrorOr;
 
 namespace CloudSales.Application.Services;
 
-public class SalesService(ISalesRepository Repository) : ISalesService
+public class SalesService(ISalesRepository Repository, ICloudService CloudService) : ISalesService
 {
     public async Task<ErrorOr<EntityPage<Account>>> GetAccountsAsync(int customerId, int pageNo, int pageSize, CancellationToken ct = default)
     {
@@ -90,6 +91,47 @@ public class SalesService(ISalesRepository Repository) : ISalesService
         license.Quantity = numberOfLicenses;
         await Repository.UpdateLicenseAsync(license, ct);
         
+        return license;
+    }
+
+    public async Task<ErrorOr<License>> CreateLicenseAsync(CreateLicenseDto dto, CancellationToken ct = default)
+    {
+        if (dto.NumberOfLicenses <= 0)
+            return LicenseErrors.InvalidNumberOfLicenses;
+        
+        if (dto.NumberOfMonths <= 0)
+            return LicenseErrors.InvalidNumberOfMonths;
+
+        if (dto.StartDate < DateTime.UtcNow)
+            return LicenseErrors.InvalidStartDate;
+        
+        var account = await Repository.GetAccountAsync(dto.AccountId, ct);
+        if (account is null)
+            return AccountErrors.NotFound;
+
+        var service = await CloudService.GetServiceAsync(dto.ServiceId, ct);
+        if (service is null)
+            return LicenseErrors.ServiceNotFound;
+
+        var license = await Repository.GetLicenseAsync(dto.AccountId, dto.ServiceId, ct);
+        if (license is not null)
+            return LicenseErrors.AlreadyExists;
+
+        license = new License
+        {
+            AccountId = account.AccountId,
+
+            ServiceId = service.ServiceId,
+            ServiceName = service.ServiceName,
+            Price = service.Price,
+
+            Quantity = dto.NumberOfLicenses,
+            ExpiryDate = dto.StartDate.AddMonths(dto.NumberOfMonths),
+            State = LicenseState.Active, 
+        };
+
+        await Repository.CreateLicenseAsync(license, ct);
+
         return license;
     }
 }
