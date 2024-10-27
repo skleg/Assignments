@@ -15,6 +15,7 @@ public static class CustomerEndpoints
         group.MapGet("/", async (AppDbContext dbContext, CancellationToken ct) =>
         {
             var customers = await dbContext.Customers
+                .OrderBy(x => x.CustomerId)
                 .Take(100)
                 .ToListAsync(ct);
 

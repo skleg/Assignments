@@ -52,10 +52,14 @@ public class SalesService(ISalesRepository Repository) : ISalesService
         if (license is null)
             return LicenseErrors.NotFound;
 
-        if (license.State != LicenseState.Active)
-            return LicenseErrors.NotActive;
+        if (withMonths <= 0)
+            return LicenseErrors.InvalidNumberOfMonths;
         
         license.ExpiryDate = license.ExpiryDate.AddMonths(withMonths);
+
+        if (license.State == LicenseState.Expired && license.ExpiryDate > DateTime.UtcNow)
+            license.State = LicenseState.Active;
+
         await Repository.UpdateLicenseAsync(license, ct);
         
         return license;
@@ -69,5 +73,23 @@ public class SalesService(ISalesRepository Repository) : ISalesService
 
         await Repository.DeleteLicenseAsync(license, ct);        
         return Result.Deleted;
+    }
+
+    public async Task<ErrorOr<License>> UpdateNumberOfLicensesAsync(int accountId, int serviceId, int numberOfLicenses, CancellationToken ct = default)
+    {
+        var license = await Repository.GetLicenseAsync(accountId, serviceId, ct);
+        if (license is null)
+            return LicenseErrors.NotFound;
+
+        if (license.State != LicenseState.Active)
+            return LicenseErrors.NotActive;
+
+        if (numberOfLicenses <= 0)
+            return LicenseErrors.InvalidNumberOfLicenses;
+        
+        license.Quantity = numberOfLicenses;
+        await Repository.UpdateLicenseAsync(license, ct);
+        
+        return license;
     }
 }

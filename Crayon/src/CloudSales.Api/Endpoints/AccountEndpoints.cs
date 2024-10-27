@@ -85,6 +85,24 @@ public static class AccountEndpoints
         .WithSummary("Cancels a license")
         .WithName("CancelLicense");
 
+        group.MapPut("/{accountId:int}/licenses/{serviceId:int}", async (
+            int accountId,
+            int serviceId,
+            UpdateLicenseRequest request,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var license = await salesService.GetAccountAsync(accountId, ct)
+                .Then(account => ValidateCustomerAccount(account, tenantContext))
+                .ThenAsync(x => salesService.UpdateNumberOfLicensesAsync(accountId, serviceId, request.NumberOfLicenses, ct));
+            
+            return license.ToOk(x => x.ToDto());
+        })
+        .Produces<LicenseDto>()
+        .WithSummary("Updates number of user licenses")
+        .WithName("UpdateLicense");
+
         return builder;
     }
 

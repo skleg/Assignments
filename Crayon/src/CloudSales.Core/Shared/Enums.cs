@@ -2,6 +2,6 @@ namespace CloudSales.Core.Shared;
 
 public enum LicenseState
 {
-    Active,
-    Expired,
+    Active = 1,
+    Expired = 2,
 }
