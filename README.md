@@ -60,4 +60,4 @@ Example for user secrets:
   - Authentication server that can be used to generate access tokens. Authentication uses customers from the Cloud Sales database.
 - *test*
   - Unit test project
-  - Integration test project
+  - Integration test project (requires Docker)
