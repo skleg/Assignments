@@ -17,6 +17,7 @@ public static class AccountEndpoints
     {
         var group = builder.MapGroup("/api/accounts")
             .WithTags("Accounts")
+            .WithOpenApi()
             .RequireAuthorization("customer");
 
         group.MapGet("/", async (

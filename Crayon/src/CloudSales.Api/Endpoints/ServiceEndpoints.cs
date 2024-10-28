@@ -9,8 +9,9 @@ public static class ServiceEndpoints
     public static IEndpointRouteBuilder MapServiceEndpoints(this IEndpointRouteBuilder builder)
     {
         var group = builder.MapGroup("/api/services")
-            .WithTags("Services")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithOpenApi()
+            .WithTags("Services");
 
         group.MapGet("/", async (ICloudService cloudService, CancellationToken ct) =>
         {

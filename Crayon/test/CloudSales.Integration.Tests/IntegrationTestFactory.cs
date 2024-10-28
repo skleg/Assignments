@@ -1,14 +1,17 @@
 using System.Data.Common;
+using System.Text;
 using CloudSales.Authentication.Models;
 using CloudSales.Authentication.Services;
 using CloudSales.Core.Entities;
 using CloudSales.Persistence.Database;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Respawn;
 using Testcontainers.SqlEdge;
 
@@ -32,7 +35,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     public AppDbContext Db { get; private set; } = default!;
     private DbConnection _connection = default!;
     private Respawner _respawner = default!;
-    private Customer _customer = default!;
+    public Customer Customer { get; private set; } = default!;
 
     public async Task ResetDatabase()
     {
@@ -59,12 +62,23 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         
         _tokenGenerator = new (services.GetService<IOptions<AuthSettings>>()!, Db);
 
-        _customer = new Customer { 
+        var customer = new Customer { 
             CustomerName = "Test Customer", 
-            UserName = "customer@test.com" 
+            UserName = "customer@test.com"
         };
-        await Db.Customers.AddAsync(_customer);
+        await Db.Customers.AddAsync(customer);
         await Db.SaveChangesAsync();
+
+        var account = new Account { 
+            CustomerId = customer.CustomerId, 
+            FirstName = "Bob",
+            LastName = "Normal",
+            UserName = "bob@example.com", 
+        };
+        await Db.Accounts.AddAsync(account);
+        await Db.SaveChangesAsync();
+
+        Customer = await Db.Customers.Include(x => x.Accounts).FirstAsync();
     }
 
     public new async Task DisposeAsync()
@@ -91,21 +105,26 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
                x.Key = _authSettings.Key;
                x.Password = _authSettings.Password;
             });
+
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {                
+                options.TokenValidationParameters = new TokenValidationParameters 
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authSettings.Key)),
+                        ValidIssuer = _authSettings.Issuer,
+                        ValidAudience = _authSettings.Audience,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                    };
+            });
         });
     }
 
     public string GetToken()
     {
-        return _tokenGenerator.GenerateToken(_customer);
+        return _tokenGenerator.GenerateToken(Customer);
     }
 
-    public Account CreateAccount()
-    {
-        return new Account { 
-            CustomerId = _customer.CustomerId, 
-            FirstName = "Bob",
-            LastName = "Normal",
-            UserName = "bob@example.com",
-        };
-    }
 }

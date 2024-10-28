@@ -9,9 +9,7 @@ public static class ServiceCollectionExtensions
     {
         var descriptor = services.SingleOrDefault(x => x.ServiceType == typeof(DbContextOptions<T>));
         if (descriptor != null)
-        {
             services.Remove(descriptor);
-        }
     }
 
     public static void EnsureDbCreated<T>(this IServiceCollection services) where T : DbContext
