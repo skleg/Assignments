@@ -22,7 +22,7 @@ public static class DatabaseExtensions
         if (!app.Environment.IsDevelopment())
             await app.Services.ApplyMigrations();
 
-        if (app.Environment.IsDevelopment())
-            await app.Services.SeedInitialData();
+        // if (app.Environment.IsDevelopment())
+        //     await app.Services.SeedInitialData();
     }
 }

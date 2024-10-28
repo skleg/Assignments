@@ -35,3 +35,5 @@ app.MapAccountEndpoints()
 await app.UseCloudDatabaseAsync();
 
 await app.RunAsync();
+
+public partial class Program { }

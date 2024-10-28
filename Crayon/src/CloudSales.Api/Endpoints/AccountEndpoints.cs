@@ -33,6 +33,21 @@ public static class AccountEndpoints
         .WithSummary("Returns customer accounts")
         .WithName("GetAccounts");
 
+        group.MapGet("/{accountId:int}", async (
+            int accountId,
+            TenantContext tenantContext,
+            ISalesService salesService,
+            CancellationToken ct) =>
+        {
+            var account = await salesService.GetAccountAsync(accountId, ct)
+                .Then(a => ValidateCustomerAccount(a, tenantContext));
+            
+            return account.ToOk(x => x.ToResponse());
+        })
+        .Produces<AccountResponse>()
+        .WithSummary("Returns a customer account")
+        .WithName("GetAccount");
+
         group.MapGet("/{accountId:int}/licenses", async (
             int accountId,
             int pageNo,

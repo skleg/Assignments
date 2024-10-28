@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using CloudSales.Authentication.Models;
+using CloudSales.Core.Entities;
 using CloudSales.Core.Errors;
 using CloudSales.Persistence.Database;
 using ErrorOr;
@@ -16,15 +17,8 @@ public class TokenGenerator(IOptions<AuthSettings> configurationOptions, AppDbCo
     private readonly AuthSettings _configuration = configurationOptions.Value;
     private readonly AppDbContext _dbContext = dbContext;
 
-    public async Task<ErrorOr<string>> GenerateTokenAsync(string userName, string password, CancellationToken ct = default)
+    public string GenerateToken(Customer customer)
     {
-        var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.UserName == userName, ct);
-        if (customer is null)
-            return CommonErrors.InvalidCredentials;
-
-        if (!string.Equals(password, _configuration.Password))
-            return CommonErrors.InvalidCredentials;
-
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -47,5 +41,16 @@ public class TokenGenerator(IOptions<AuthSettings> configurationOptions, AppDbCo
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+    public async Task<ErrorOr<string>> GenerateTokenAsync(string userName, string password, CancellationToken ct = default)
+    {
+        var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.UserName == userName, ct);
+        if (customer is null)
+            return CommonErrors.InvalidCredentials;
+
+        if (!string.Equals(password, _configuration.Password))
+            return CommonErrors.InvalidCredentials;
+
+        return GenerateToken(customer);
     }
 }
