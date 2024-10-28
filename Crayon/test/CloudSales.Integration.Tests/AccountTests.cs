@@ -2,11 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using CloudSales.Api.Contracts;
 using CloudSales.Api.Contracts.Requests;
-using CloudSales.Core.Entities;
-using CloudSales.Core.Shared;
 using CloudSales.Persistence.Database;
 using FluentAssertions;
-using Respawn;
 
 namespace CloudSales.Integration.Tests;
 
