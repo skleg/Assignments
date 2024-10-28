@@ -1,8 +1,12 @@
-
+using System.Net;
 using System.Net.Http.Json;
 using CloudSales.Api.Contracts;
+using CloudSales.Api.Contracts.Requests;
+using CloudSales.Core.Entities;
+using CloudSales.Core.Shared;
 using CloudSales.Persistence.Database;
 using FluentAssertions;
+using Respawn;
 
 namespace CloudSales.Integration.Tests;
 
@@ -34,6 +38,30 @@ public class AccountTests: IClassFixture<IntegrationTestFactory>, IAsyncLifetime
         // Assert
         actual.Should().NotBeNull();
         actual!.Id.Should().Be(expected.AccountId);
+    }
+
+    [Fact]
+    public async Task AddLicense_ShouldCreateNewLicense()
+    {
+        // Arrange
+        var account = _factory.Customer.Accounts.First();
+        var services = await _factory.CloudService.GetServicesAsync();
+        var service = services.First();
+        var request = new AddLicenseRequest
+        {
+            ServiceId = service.ServiceId,
+            NumberOfLicenses = 1,
+            NumberOfMonths = 1,  
+        };
+        var expected = new LicenseResponse(service.ServiceId, service.ServiceName, request.NumberOfMonths, DateTime.UtcNow.Date.AddMonths(1), true);
+
+        // Act
+        var result = await _client.PostAsJsonAsync($"api/accounts/{account.AccountId}/licenses", request);
+        var actual = await result.Content.ReadFromJsonAsync<LicenseResponse>();
+
+        // Assert
+        result.StatusCode.Should().Be(HttpStatusCode.OK);
+        actual.ShouldBeEquivalentTo(expected);
     }
 
     public Task InitializeAsync() => Task.CompletedTask;

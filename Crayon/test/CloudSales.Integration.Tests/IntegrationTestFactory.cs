@@ -1,8 +1,10 @@
 using System.Data.Common;
 using System.Text;
+using Azure.Core.Pipeline;
 using CloudSales.Authentication.Models;
 using CloudSales.Authentication.Services;
 using CloudSales.Core.Entities;
+using CloudSales.Core.Interfaces;
 using CloudSales.Persistence.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +12,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Respawn;
 using Testcontainers.SqlEdge;
@@ -35,6 +36,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     public AppDbContext Db { get; private set; } = default!;
     private DbConnection _connection = default!;
     private Respawner _respawner = default!;
+    public ICloudService CloudService { get; private set; } = default!;
     public Customer Customer { get; private set; } = default!;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -91,6 +93,8 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             SchemasToInclude = ["dbo"],
             TablesToInclude = ["Accounts", "Licenses"],
         });
+
+        CloudService = services.GetRequiredService<ICloudService>();
         
         _tokenGenerator = services.GetRequiredService<TokenGenerator>();
 
@@ -135,4 +139,5 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         return _tokenGenerator.GenerateToken(Customer);
     }
 
+    
 }
