@@ -63,3 +63,10 @@ Example for user secrets:
   - Integration test project (requires Docker)
 - *docs*
   - Flow charts and diagrams
+
+## Improvements ##
+
+- Identity field may be converted into UUID v7 (ULID or .Net 9)
+- Fluent validation
+- Output caching
+- Resilience
