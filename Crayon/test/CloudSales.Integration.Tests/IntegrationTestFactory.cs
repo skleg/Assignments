@@ -37,9 +37,41 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
     private Respawner _respawner = default!;
     public Customer Customer { get; private set; } = default!;
 
-    public async Task ResetDatabase()
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        await _respawner.ResetAsync(_connection);
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveDbContext<AppDbContext>();
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(_container.GetConnectionString());
+            });
+            services.EnsureDbCreated<AppDbContext>();
+
+            services.Configure<AuthSettings>(x => 
+            {
+               x.Audience = _authSettings.Audience;
+               x.Issuer = _authSettings.Issuer;
+               x.Key = _authSettings.Key;
+               x.Password = _authSettings.Password;
+            });
+
+            services.AddScoped<TokenGenerator>();
+
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {                
+                options.TokenValidationParameters = new TokenValidationParameters 
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authSettings.Key)),
+                    ValidIssuer = _authSettings.Issuer,
+                    ValidAudience = _authSettings.Audience,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
+            });
+        });
     }
 
     public async Task InitializeAsync()
@@ -60,7 +92,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             TablesToInclude = ["Accounts", "Licenses"],
         });
         
-        _tokenGenerator = new (services.GetService<IOptions<AuthSettings>>()!, Db);
+        _tokenGenerator = services.GetRequiredService<TokenGenerator>();
 
         var customer = new Customer { 
             CustomerName = "Test Customer", 
@@ -69,57 +101,33 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
         await Db.Customers.AddAsync(customer);
         await Db.SaveChangesAsync();
 
-        var account = new Account { 
-            CustomerId = customer.CustomerId, 
-            FirstName = "Bob",
-            LastName = "Normal",
-            UserName = "bob@example.com", 
-        };
-        await Db.Accounts.AddAsync(account);
+        await Db.Accounts.AddRangeAsync(
+        [
+            new Account { 
+                CustomerId = customer.CustomerId, 
+                FirstName = "Bob",
+                LastName = "Normal",
+                UserName = "bob@example.com" },
+            new Account { 
+                CustomerId = customer.CustomerId, 
+                FirstName = "Sally",
+                LastName = "Cornell",
+                UserName = "sally@example.com" }
+        ]);
         await Db.SaveChangesAsync();
 
         Customer = await Db.Customers.Include(x => x.Accounts).FirstAsync();
+    }
+
+    public async Task ResetDatabase()
+    {
+        await _respawner.ResetAsync(_connection);
     }
 
     public new async Task DisposeAsync()
     {
         await _connection.CloseAsync();
         await _container.DisposeAsync();
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureTestServices(services =>
-        {
-            services.RemoveDbContext<AppDbContext>();
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseSqlServer(_container.GetConnectionString());
-            });
-            services.EnsureDbCreated<AppDbContext>();
-
-            services.Configure<AuthSettings>(x => 
-            {
-               x.Audience = _authSettings.Audience;
-               x.Issuer = _authSettings.Issuer;
-               x.Key = _authSettings.Key;
-               x.Password = _authSettings.Password;
-            });
-
-            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-            {                
-                options.TokenValidationParameters = new TokenValidationParameters 
-                    {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authSettings.Key)),
-                        ValidIssuer = _authSettings.Issuer,
-                        ValidAudience = _authSettings.Audience,
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                    };
-            });
-        });
     }
 
     public string GetToken()

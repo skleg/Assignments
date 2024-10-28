@@ -1,8 +1,6 @@
 
 using System.Net.Http.Json;
-using AutoFixture;
 using CloudSales.Api.Contracts;
-using CloudSales.Core.Entities;
 using CloudSales.Persistence.Database;
 using FluentAssertions;
 
@@ -10,7 +8,6 @@ namespace CloudSales.Integration.Tests;
 
 public class AccountTests: IClassFixture<IntegrationTestFactory>, IAsyncLifetime
 {
-//    private readonly Fixture _fixture = new();
     private readonly AppDbContext _dbContext;
     private readonly HttpClient _client;
     private readonly Func<Task> _resetDatabase;
