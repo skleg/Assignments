@@ -61,3 +61,5 @@ Example for user secrets:
 - *test*
   - Unit test project
   - Integration test project (requires Docker)
+- *docs*
+  - Flow charts and diagrams
