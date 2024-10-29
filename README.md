@@ -51,6 +51,16 @@ Example for user secrets:
     - Configure the endpoint
     - Add authentication, resilience and caching
 
+## Data migrations ##
+
+- Migrations can be executed manually using the Persistence project
+
+## Running manual tests ##
+
+- Test data for Customers and Accounts can be generated using data seed. Uncomment the code in the ```DatabaseExtensions``` class.
+- Use the Swagger in Authentication API to generate a token using and existing customer and configured password.
+- Use the token to call the Sales API.
+
 ## Improvements ##
 
 - Identity field may be converted into UUID v7 (ULID or GUIDv7 in .Net 9)
