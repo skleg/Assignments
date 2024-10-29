@@ -332,8 +332,35 @@ public class SalesServiceTests
     }
 
 #endregion
+#region UpdateNumberOfLicensesAsync
 
-// TODO: Create UpdateNumberOfLicensesAsync unit tests
+    [Fact]
+    public async void UpdateNumberOfLicensesAsync_ShouldUpdateNumberOfLicenses()
+    {
+        // Arrange
+        var account = CreateAccount();
+        var license = CreateLicense();
+        int numberOfLicenses = 2;
+        var dto = new UpdateSubscriptionRequest(account.UserName, license.ServiceId, numberOfLicenses, license.ExpiryDate);
+
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(license);
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(account);
+        
+        // Act
+        var result = await _sut.UpdateNumberOfLicensesAsync(It.IsAny<int>(), It.IsAny<int>(), numberOfLicenses, It.IsAny<CancellationToken>());
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.Quantity.Should().Be(numberOfLicenses);
+
+        _cloudMock.Verify(x => x.UpdateSubscriptionAsync(dto, It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(x => x.UpdateLicenseAsync(It.IsAny<License>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+#endregion
+
 // TODO: Create CreateLicenseAsync unit tests
 
     private static License CreateLicense()
