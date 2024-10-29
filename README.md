@@ -67,3 +67,4 @@ Example for user secrets:
 - Fluent validation
 - Output caching
 - Resilience
+- Open telemetry
