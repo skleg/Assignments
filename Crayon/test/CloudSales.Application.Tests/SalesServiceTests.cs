@@ -360,8 +360,56 @@ public class SalesServiceTests
     }
 
 #endregion
+#region UpdateNumberOfLicensesAsync
 
-// TODO: Create CreateLicenseAsync unit tests
+    [Fact]
+    public async void CreateLicenseAsync_ShouldUpdateNumberOfLicenses()
+    {
+        // Arrange
+        var account = CreateAccount();
+        var service = new ServiceDto { ServiceId = 1, ServiceName = "Service", Price = 100 };
+        var dto = new CreateLicenseDto(account.AccountId, service.ServiceId, 1, 1);
+        var receipt = new PurchaseReceiptDto
+        {
+            NumberOfLicenses = dto.NumberOfLicenses,
+            Price = service.Price,
+            ServiceName = service.ServiceName,
+            ServiceId = service.ServiceId,
+            UserName = account.UserName,
+            ValidFrom = DateTime.Today,
+            ValidUntil = DateTime.Today.AddMonths(dto.NumberOfMonths),
+        };
+        var expected = new License { 
+            AccountId = account.AccountId, 
+            ServiceId = service.ServiceId, 
+            ExpiryDate = DateTime.Today.AddMonths(dto.NumberOfMonths), 
+            Price = service.Price, 
+            Quantity = dto.NumberOfLicenses, 
+            ServiceName = service.ServiceName, 
+            State = LicenseState.Active 
+        };
+
+        _repositoryMock.Setup(x => x.GetAccountAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(account);
+        _repositoryMock.Setup(x => x.GetLicenseAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(null as License);
+        _cloudMock.Setup(x => x.GetServiceAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(service);
+        _cloudMock.Setup(x => x.CreateSubscriptionAsync(It.IsAny<CreateSubscriptionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(receipt);
+        
+        // Act
+        var result = await _sut.CreateLicenseAsync(dto, It.IsAny<CancellationToken>());
+
+        // Assert
+        result.IsError.Should().BeFalse();
+        result.Value.ShouldBeEquivalentTo(expected);
+
+        _cloudMock.Verify(x => x.CreateSubscriptionAsync(It.IsAny<CreateSubscriptionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(x => x.CreateLicenseAsync(It.IsAny<License>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+#endregion
 
     private static License CreateLicense()
     {
