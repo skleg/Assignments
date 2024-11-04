@@ -24,8 +24,8 @@ Example for user secrets:
     },
     "Jwt": {
       "Key": "very-secret-key-do-not-use-in-production",
-      "Issuer": "https://auth.crayon.se",
-      "Audience": "https://crayon.se",
+      "Issuer": "https://auth.playcon.se",
+      "Audience": "https://playcon.se",
       "Password": "Test1234!"
     }
 }
