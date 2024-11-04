@@ -5,7 +5,7 @@ For tech stack, please go with.Net and SQL.
 
 ## Case description – Introduction ##
 
-Crayon wants to implement a solution for cloud sales. Crayon has a business partner, a Cloud Computing Provider (called CCP from now on). The CCP offers an API that Crayon can use to automate the business.
+Playcon wants to implement a solution for cloud sales. Playcon has a business partner, a Cloud Computing Provider (called CCP from now on). The CCP offers an API that Playcon can use to automate the business.
 Solution should provide customers to buy and manage software solutions offered by CCP. Each purchased software is tied to a single account. Each customer can have multiple accounts.
 Purchased software has a name (e.g. Microsoft Office), quantity (number of licenses, e.g. 5), state (active, etc.) and the valid to date (e.g. software license is valid until 31st of August, 2023.)
 
