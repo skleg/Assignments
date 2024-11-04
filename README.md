@@ -40,16 +40,6 @@ Example for user secrets:
 - *test*
   - Unit test project
   - Integration test project (requires Docker)
-- *docs*
-  - Flow charts and diagrams
-
-## ToDo ##
-
-- Implement Cloud Service
-  - **Current implementation is a mock**
-  - Create an implementation with an Http client
-    - Configure the endpoint
-    - Add authentication, resilience and caching
 
 ## Data migrations ##
 
@@ -61,10 +51,3 @@ Example for user secrets:
 - Use the Swagger in Authentication API to generate a token using and existing customer and configured password.
 - Use the token to call the Sales API.
 
-## Improvements ##
-
-- Identity field may be converted into UUID v7 (ULID or GUIDv7 in .Net 9)
-- Fluent validation
-- Output caching
-- Resilience
-- Open telemetry
